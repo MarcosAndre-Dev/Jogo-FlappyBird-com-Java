@@ -7,7 +7,7 @@ public class App {
         int AlturaBorda = 640;
 
         JFrame janela = new JFrame("Flappy Bird");
-        janela.setVisible(true);
+        
         janela.setSize(LarguraBorda,AlturaBorda);
         janela.setLocationRelativeTo(null);
         janela.setResizable(false);
@@ -17,6 +17,5 @@ public class App {
         janela.add(flappyBird);
         janela.pack();
         janela.setVisible(true);
-
     }
 }
