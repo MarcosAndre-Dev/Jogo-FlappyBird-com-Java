@@ -60,13 +60,17 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
     Bird bird;
     int VelocityX = -4;
     int VelocityY = 0;
-    int gravity = 1;
+    int gravity = 1;               
 
     ArrayList<Pipe> pipes;
     Random random = new Random();
 
     Timer gameLoop;
     Timer placePipesTimer;
+
+    boolean gameOver = false;
+
+    double counter = 0;
 
     FlappyBird() {
 
@@ -107,8 +111,14 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
     }
 
     public void placePipes() {
+        int randomPipeY = (int)(PipeY - PipeHeight / 4 - Math.random() * (PipeHeight/2));
+        int openingSpace = AlturaBorda / 4;
         Pipe topPipe = new Pipe(topPipeImage);
+        topPipe.y = randomPipeY;
         pipes.add(topPipe);
+        Pipe bottomPipe = new Pipe(bottomPipeImage);
+        bottomPipe.y = topPipe.y + PipeHeight + openingSpace;
+        pipes.add(bottomPipe);
     }
 
     public void draw(Graphics g) {
@@ -119,6 +129,10 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
             Pipe pipe = pipes.get(i);
             g.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height, null);
         }
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD,20));
+        g.drawString("Score: " + (int)counter, 10, 20);
+
     }
 
     public void move() {
@@ -129,19 +143,50 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
         for (int i = 0; i < pipes.size(); i++) {
             Pipe pipe = pipes.get(i);
             pipe.x += VelocityX;
+            if(!pipe.Passed && bird.x > pipe.x + pipe.width){
+                pipe.Passed = true;
+                counter += 0.5;
+            }
+
+        }
+        if (bird.y > AlturaBorda){
+            gameOver = true;
         }
     }
+
+public boolean collision(Bird a, Pipe b) {
+    return a.x < b.x + b.width &&
+           a.x + a.width > b.x &&
+           a.y < b.y + b.height &&
+           a.y + a.height > b.y;
+}
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
         move();
         repaint();
+        if (gameOver){
+            placePipesTimer.stop();
+            gameLoop.stop();
+        }
+
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            VelocityY = -6;
+            VelocityY = -9;
+        }
+        if(gameOver){
+            bird.y = birdY;
+            bird.x = birdX;
+            bird.y = birdY;
+            pipes.clear();
+            counter = 0;
+            gameOver = false;
+            placePipesTimer.start();
+            gameLoop.start();
         }
     }
 
